@@ -8,7 +8,7 @@ import sys
 import glob
 import pandas as pd
 import xgboost as xgb
-import matplotlib.pyplot as plt
+import cupy
 from sklearn.inspection import permutation_importance
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
@@ -45,7 +45,9 @@ def main(args):
             QTREES_LABEL = 'qtrees'
         else:
             QTREES_LABEL = 'prediction'
+        print(d.columns)
         d = d[['index_ph',
+               'geoid_corr_h',
                QTREES_LABEL,
                'cshelph',
                'medianfilter',
@@ -91,11 +93,17 @@ def main(args):
     # Replace 'water column' with 'unclassified'
     df = df.replace(45.0, 0.0)
 
-    for col in df.columns:
+    for col in algorithms:
         x = df[col].unique()
         print(f'unique({col}): {x}')
 
-    x = df[df.columns.intersection(algorithms)]
+    features = algorithms
+    features.append('geoid_corr_h')
+
+    if args.verbose:
+        print('Features:', features)
+
+    x = df[df.columns.intersection(features)]
     y = df.manual_label.to_numpy()
 
     # Make labels consecutive
@@ -114,7 +122,10 @@ def main(args):
 
     clf.save_model(args.model_filename)
 
-    p = clf.predict(x)
+    if args.verbose:
+        print('Getting predictions...')
+
+    p = clf.predict(cupy.array(x))
     r = classification_report(y, p, digits=3)
     print(r)
     f1 = f1_score(y, p, average='weighted')
@@ -132,12 +143,16 @@ def main(args):
     '''
 
     # Get feature importances
-    print(f'{"col":>20}{"importance":>10}')
-    for n, col in enumerate(algorithms):
-        print(f'{col:>20}{clf.feature_importances_[n]:10.5f}')
+    print(f'{"col":>20}{"importance":>20}')
+    for n, col in enumerate(x.columns):
+        print(f'{col:>20}{clf.feature_importances_[n]:20.5f}')
 
     print('Getting permutation importances...')
-    r = permutation_importance(clf, x, y, n_repeats=3, random_state=0)
+    r = permutation_importance(clf,
+                               x,
+                               y,
+                               n_repeats=3,
+                               random_state=0)
 
     for i in r.importances_mean.argsort()[::-1]:
         if r.importances_mean[i] - 2 * r.importances_std[i] > 0:
