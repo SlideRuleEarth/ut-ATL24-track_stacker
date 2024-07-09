@@ -6,7 +6,6 @@ ATL24 Bathy Track Stacker
 import argparse
 import sys
 import glob
-import matplotlib.pyplot as plt
 import pandas as pd
 import xgboost as xgb
 import cupy
@@ -14,7 +13,6 @@ from sklearn.inspection import permutation_importance
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
 from sklearn.metrics import balanced_accuracy_score
-
 
 
 def main(args):
@@ -48,8 +46,7 @@ def main(args):
         else:
             QTREES_LABEL = 'prediction'
 
-        d = d[['index_ph',
-               'geoid_corr_h',
+        d = d[['geoid_corr_h',
                QTREES_LABEL,
                'cshelph',
                'medianfilter',
@@ -69,15 +66,14 @@ def main(args):
         print(f'Final dataframe = {df.shape}')
 
     algorithms = [
-        'qtrees',
+        'bathypathfinder',
+        'coastnet',
         'cshelph',
         'medianfilter',
-        'bathypathfinder',
         'openoceans',
-        'coastnet',
         'pointnet',
+        'qtrees',
         ]
-    algorithms.sort()
 
     ref = df['manual_label']
 
@@ -100,7 +96,7 @@ def main(args):
             x = df[col].unique()
             print(f'unique({col}): {x}')
 
-    features = algorithms
+    features = algorithms.copy()
     features.append('geoid_corr_h')
 
     if args.verbose:
@@ -136,15 +132,6 @@ def main(args):
     print(f'Weighted F1\t{f1:.3f}')
     print(f'Balanced accuracy\t{ba:.3f}')
 
-    df = df[algorithms]
-    plt.matshow(df.corr())
-    plt.xticks(range(df.shape[1]), df.columns, fontsize=14, rotation=45)
-    plt.yticks(range(df.shape[1]), df.columns, fontsize=14, rotation=45)
-    cb = plt.colorbar()
-    cb.ax.tick_params(labelsize=14)
-    plt.title('Feature Correlations', fontsize=16)
-    plt.show()
-
     # Get feature importances
     print(f'{"col":>20}{"importance":>20}')
     for n, col in enumerate(x.columns):
@@ -154,14 +141,14 @@ def main(args):
     r = permutation_importance(clf,
                                x,
                                y,
-                               n_repeats=3,
+                               n_repeats=10,
                                random_state=0)
+    print(r)
 
     for i in r.importances_mean.argsort()[::-1]:
-        if r.importances_mean[i] - 2 * r.importances_std[i] > 0:
-            print(f"{algorithms[i]:<20}"
-                  f"{r.importances_mean[i]:5.2f}"
-                  f" +/- {r.importances_std[i]:5.2f}")
+        print(f"{x.columns[i]:<20}"
+              f"{r.importances_mean[i]:5.2f}"
+              f" +/- {r.importances_std[i]:5.2f}")
 
 
 if __name__ == "__main__":
