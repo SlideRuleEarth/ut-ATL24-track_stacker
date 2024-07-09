@@ -8,18 +8,26 @@ default: help
 #
 ##############################################################################
 
-INPUT=./data/local/merged_Sliderule/*_1.csv
+INPUT=./data/local/merged_Sliderule/*.csv
 MODEL=./models/model.json
 EPOCHS=100
 
 .PHONY: score # Compute score across all predictions
 score:
 	@python apps/score.py \
+		--verbose \
+		"$(INPUT)"
+
+.PHONY: corr # Compute correlations between predictions
+corr:
+	@python apps/corr.py \
+		--verbose \
 		"$(INPUT)"
 
 .PHONY: train # Train a model
 train:
 	@./apps/train.py \
+		--verbose \
 		--epochs=$(EPOCHS) \
 		--model-filename=$(MODEL) \
 		"$(INPUT)"
