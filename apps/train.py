@@ -6,6 +6,7 @@ ATL24 Bathy Track Stacker
 import argparse
 import sys
 import glob
+import matplotlib.pyplot as plt
 import pandas as pd
 import xgboost as xgb
 import cupy
@@ -13,6 +14,7 @@ from sklearn.inspection import permutation_importance
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
 from sklearn.metrics import balanced_accuracy_score
+
 
 
 def main(args):
@@ -45,7 +47,7 @@ def main(args):
             QTREES_LABEL = 'qtrees'
         else:
             QTREES_LABEL = 'prediction'
-        print(d.columns)
+
         d = d[['index_ph',
                'geoid_corr_h',
                QTREES_LABEL,
@@ -93,9 +95,10 @@ def main(args):
     # Replace 'water column' with 'unclassified'
     df = df.replace(45.0, 0.0)
 
-    for col in algorithms:
-        x = df[col].unique()
-        print(f'unique({col}): {x}')
+    if args.verbose:
+        for col in algorithms:
+            x = df[col].unique()
+            print(f'unique({col}): {x}')
 
     features = algorithms
     features.append('geoid_corr_h')
@@ -133,14 +136,14 @@ def main(args):
     print(f'Weighted F1\t{f1:.3f}')
     print(f'Balanced accuracy\t{ba:.3f}')
 
-    '''
-    g = xgb.to_graphviz(clf, num_trees=1)
-    g.view()
-
-    fig, ax = plt.subplots()
-    xgb.plot_tree(clf, num_trees=4, ax=ax)
+    df = df[algorithms]
+    plt.matshow(df.corr())
+    plt.xticks(range(df.shape[1]), df.columns, fontsize=14, rotation=45)
+    plt.yticks(range(df.shape[1]), df.columns, fontsize=14, rotation=45)
+    cb = plt.colorbar()
+    cb.ax.tick_params(labelsize=14)
+    plt.title('Feature Correlations', fontsize=16)
     plt.show()
-    '''
 
     # Get feature importances
     print(f'{"col":>20}{"importance":>20}')
