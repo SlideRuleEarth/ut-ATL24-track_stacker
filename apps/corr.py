@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def plot_corr(title, x):
+def plot_corr(fn, title, x):
     print(x.corr())
     plt.matshow(x.corr())
     plt.xticks(range(x.shape[1]), x.columns, fontsize=14, rotation=90)
@@ -18,7 +18,7 @@ def plot_corr(title, x):
     cb = plt.colorbar()
     cb.ax.tick_params(labelsize=14)
     plt.title(title, fontsize=16)
-    plt.show()
+    plt.savefig(fn)
 
 
 def main(args):
@@ -95,9 +95,9 @@ def main(args):
     df_surface = df.replace(41.0, 0.0)
     df_bathy = df.replace(40.0, 0.0)
 
-    plot_corr("All predictions", df)
-    plot_corr("Surface predictions", df_surface)
-    plot_corr("Bathy predictions", df_bathy)
+    plot_corr('all_corr.png', 'All predictions', df)
+    plot_corr('surface_corr.png', 'Surface predictions', df_surface)
+    plot_corr('bathy_corr.png', 'Bathy predictions', df_bathy)
 
 
 if __name__ == "__main__":

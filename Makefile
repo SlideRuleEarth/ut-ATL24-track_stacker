@@ -23,6 +23,9 @@ corr:
 	@python apps/corr.py \
 		--verbose \
 		"$(INPUT)"
+	@eog all_corr.png &
+	@eog surface_corr.png &
+	@eog bathy_corr.png &
 
 .PHONY: train # Train a model
 train:
