@@ -109,6 +109,7 @@ def main(args):
                'medianfilter',
                'bathypathfinder',
                'openoceans',
+               'openoceanspp',
                'coastnet',
                'pointnet',
                'manual_label']]
@@ -128,6 +129,7 @@ def main(args):
         'medianfilter',
         'bathypathfinder',
         'openoceans',
+        'openoceanspp',
         'coastnet',
         'pointnet',
         ]

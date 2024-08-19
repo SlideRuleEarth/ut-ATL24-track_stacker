@@ -8,7 +8,7 @@ default: help
 #
 ##############################################################################
 
-INPUT=./data/local/merged_Sliderule/*.csv
+INPUT=./data/local/merged_Sliderule_v1/*.csv
 MODEL=./models/model.json
 EPOCHS=100
 

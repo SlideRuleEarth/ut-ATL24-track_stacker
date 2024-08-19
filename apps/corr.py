@@ -53,12 +53,13 @@ def main(args):
             QTREES_LABEL = 'prediction'
 
         d = d[['index_ph',
-               'geoid_corr_h',
+               'ortho_h',
                QTREES_LABEL,
                'cshelph',
                'medianfilter',
                'bathypathfinder',
                'openoceans',
+               'openoceanspp',
                'coastnet',
                'pointnet',
                'manual_label']]
@@ -79,6 +80,7 @@ def main(args):
         'cshelph',
         'medianfilter',
         'openoceans',
+        'openoceanspp',
         'pointnet',
         'qtrees',
         ]

@@ -46,12 +46,13 @@ def main(args):
         else:
             QTREES_LABEL = 'prediction'
 
-        d = d[['geoid_corr_h',
+        d = d[['ortho_h',
                QTREES_LABEL,
                'cshelph',
                'medianfilter',
                'bathypathfinder',
                'openoceans',
+               'openoceanspp',
                'coastnet',
                'pointnet',
                'manual_label']]
@@ -71,6 +72,7 @@ def main(args):
         'cshelph',
         'medianfilter',
         'openoceans',
+        'openoceanspp',
         'pointnet',
         'qtrees',
         ]
@@ -97,7 +99,7 @@ def main(args):
             print(f'unique({col}): {x}')
 
     features = algorithms.copy()
-    features.append('geoid_corr_h')
+    features.append('ortho_h')
 
     if args.verbose:
         print('Features:', features)
