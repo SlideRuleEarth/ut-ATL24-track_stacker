@@ -58,7 +58,6 @@ def main(args):
               f' MODEL=${{tmpdir}}/{split}/model.json'
               f' classify')
         print(f'make --no-print-directory INPUT="${{tmpdir}}/{split}/*.csv"'
-              f' MODEL=${{tmpdir}}/{split}/model.json'
               f' score > cross_val.{split}.txt')
 
 

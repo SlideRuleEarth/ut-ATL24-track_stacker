@@ -46,9 +46,7 @@ classify:
 
 .PHONY: score # Score predictions
 score:
-	@python apps/score.py \
-		--verbose \
-		"$(OUTPUT)"
+	@python apps/score.py "$(OUTPUT)"
 
 .PHONY: cross_validate # Cross validate track stacker
 cross_validate:

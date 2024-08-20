@@ -9,7 +9,9 @@ import glob
 import sys
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
+from sklearn.metrics import matthews_corrcoef
 
 
 def score_all(r, d):
@@ -28,40 +30,37 @@ def score_all(r, d):
           f'{macro_f1:10.3f}')
 
 
-def score_surface(r, d):
+def score_binary(r, d, pos_label):
 
-    # Replace 'bathy' with 'unclassified'
-    r = r.replace(40.0, 0.0)
-    d = d.replace(40.0, 0.0)
+    # Replace values
+    r[r != pos_label] = 0
+    d[d != pos_label] = 0
 
     print(f'{"Accuracy":>10}'
           f'{"F1":>10}'
-          f'{"BA":>10}')
+          f'{"BA":>10}'
+          f'{"calF1":>10}'
+          f'{"MCC":>10}'
+          f'{"avg4":>10}'
+          )
 
     # Get the scores
     p = d['prediction']
     acc = accuracy_score(r, p)
-    f1 = f1_score(r, p, pos_label=41.0)
+    f1 = f1_score(r, p, pos_label=pos_label)
     ba = balanced_accuracy_score(r, p)
-    print(f'{acc:10.3f}{ba:10.3f}{f1:10.3f}')
-
-
-def score_bathy(r, d):
-
-    # Replace 'surface' with 'unclassified'
-    r = r.replace(41.0, 0.0)
-    d = d.replace(41.0, 0.0)
-
-    print(f'{"Accuracy":>10}'
-          f'{"F1":>10}'
-          f'{"BA":>10}')
-
-    # Get the scores
-    p = d['prediction']
-    acc = accuracy_score(r, p)
-    f1 = f1_score(r, p, pos_label=40.0)
-    ba = balanced_accuracy_score(r, p)
-    print(f'{acc:10.3f}{ba:10.3f}{f1:10.3f}')
+    mcc = matthews_corrcoef(r, p)
+    cm = confusion_matrix(r, p)
+    TP = cm[0][0]
+    FN = cm[0][1]
+    FP = cm[1][0]
+    TN = cm[1][1]
+    TPR = TP / (TP + FN)
+    FPR = FP / (FP + TN)
+    r0 = 0.5
+    cal_f1 = 2.0 * TPR / (TPR + (1.0 / r0) * FPR + 1)
+    avg = (f1 + ba + cal_f1 + mcc) / 4.0
+    print(f'{acc:10.3f}{f1:10.3f}{ba:10.3f}{cal_f1:10.3f}{mcc:10.3f}{avg:10.3f}')
 
 
 def main(args):
@@ -108,20 +107,25 @@ def main(args):
     # Replace 'water column' with 'unclassified'
     df = df.replace(45.0, 0.0)
 
-    if args.verbose:
-        print('All labels')
-
+    print('All labels')
     score_all(ref, df)
 
+    print('Surface labels')
+    score_binary(ref.copy(), df.copy(), 41)
+
+    print('Bathy labels')
+    score_binary(ref.copy(), df.copy(), 40)
+
+    # Remove photons labeled as surface
+    print('Non-surface bathy labels')
+    n_before = len(ref)
+    ind = ref.loc[ref == 41].index
+    ref = ref.drop(index=ind)
+    df = df.drop(index=ind)
+    n_after = len(ref)
     if args.verbose:
-        print('Surface labels')
-
-    score_surface(ref, df)
-
-    if args.verbose:
-        print('Bathy labels')
-
-    score_bathy(ref, df)
+        print(f'Removed {n_before-n_after} non-bathy photons')
+    score_binary(ref, df, 40)
 
 
 if __name__ == "__main__":
