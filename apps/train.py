@@ -8,7 +8,6 @@ import sys
 import glob
 import pandas as pd
 import xgboost as xgb
-import cupy
 from sklearn.inspection import permutation_importance
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
@@ -41,13 +40,8 @@ def main(args):
         if args.verbose:
             print(f'Read {len(df.index)} rows')
 
-        if 'qtrees' in d.columns:
-            QTREES_LABEL = 'qtrees'
-        else:
-            QTREES_LABEL = 'prediction'
-
         d = d[['ortho_h',
-               QTREES_LABEL,
+               'qtrees',
                'cshelph',
                'medianfilter',
                'bathypathfinder',
@@ -56,7 +50,6 @@ def main(args):
                'coastnet',
                'pointnet',
                'manual_label']]
-        d.rename(columns={"prediction": "qtrees"})
 
         if args.verbose:
             print(d.columns)
@@ -126,7 +119,7 @@ def main(args):
     if args.verbose:
         print('Getting predictions...')
 
-    p = clf.predict(cupy.array(x))
+    p = clf.predict(x)
     r = classification_report(y, p, digits=3)
     print(r)
     f1 = f1_score(y, p, average='weighted')
@@ -139,18 +132,19 @@ def main(args):
     for n, col in enumerate(x.columns):
         print(f'{col:>20}{clf.feature_importances_[n]:20.5f}')
 
-    print('Getting permutation importances...')
-    r = permutation_importance(clf,
-                               x,
-                               y,
-                               n_repeats=10,
-                               random_state=0)
-    print(r)
+    if args.permutation_importances:
+        print('Getting permutation importances...')
+        r = permutation_importance(clf,
+                                   x,
+                                   y,
+                                   n_repeats=10,
+                                   random_state=0)
+        print(r)
 
-    for i in r.importances_mean.argsort()[::-1]:
-        print(f"{x.columns[i]:<20}"
-              f"{r.importances_mean[i]:5.2f}"
-              f" +/- {r.importances_std[i]:5.2f}")
+        for i in r.importances_mean.argsort()[::-1]:
+            print(f"{x.columns[i]:<20}"
+                  f"{r.importances_mean[i]:5.2f}"
+                  f" +/- {r.importances_std[i]:5.2f}")
 
 
 if __name__ == "__main__":
@@ -160,6 +154,9 @@ if __name__ == "__main__":
     parser.add_argument(
         '-v', '--verbose', action='store_true',
         help='Show verbose output')
+    parser.add_argument(
+        '-p', '--permutation-importances', action='store_true',
+        help='Compute permutation importances')
     parser.add_argument(
         '-e', '--epochs',
         type=int,
