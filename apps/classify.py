@@ -65,7 +65,7 @@ def main(args):
         print(f'Balanced accuracy\t{ba:.3f}', file=sys.stderr)
 
     # Assign predictions
-    df["prediction"] = p
+    df["ensemble"] = p
 
     # Change labels back to APSRS
     df[df == 1] = 40

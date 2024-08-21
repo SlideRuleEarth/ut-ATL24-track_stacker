@@ -14,29 +14,37 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import matthews_corrcoef
 
 
-def score_all(r, d):
+def score_all(c, a, r, d):
 
-    print(f'{"Accuracy":>10}'
+    print(f'{"Cls":>10}'
+          f'{"Name":>20}'
+          f'{"Accuracy":>10}'
           f'{"WghtF1":>10}'
           f'{"MacroF1":>10}')
 
     # Get the scores
-    p = d['prediction']
+    p = d[a]
     acc = accuracy_score(r, p)
     weighted_f1 = f1_score(r, p, average="weighted")
     macro_f1 = f1_score(r, p, average="macro")
-    print(f'{acc:10.3f}'
+    print(f'{c:>10}'
+          f'{a:>20}'
+          f'{acc:10.3f}'
           f'{weighted_f1:10.3f}'
           f'{macro_f1:10.3f}')
 
 
-def score_binary(r, d, pos_label):
+def score_binary(c, a, ref, df, pos_label):
 
     # Replace values
+    r = ref.copy()
+    d = df.copy()
     r[r != pos_label] = 0
     d[d != pos_label] = 0
 
-    print(f'{"Accuracy":>10}'
+    print(f'{"Cls":>10}'
+          f'{"Name":>20}'
+          f'{"Accuracy":>10}'
           f'{"F1":>10}'
           f'{"BA":>10}'
           f'{"calF1":>10}'
@@ -45,7 +53,7 @@ def score_binary(r, d, pos_label):
           )
 
     # Get the scores
-    p = d['prediction']
+    p = d[a]
     acc = accuracy_score(r, p)
     f1 = f1_score(r, p, pos_label=pos_label)
     ba = balanced_accuracy_score(r, p)
@@ -60,7 +68,14 @@ def score_binary(r, d, pos_label):
     r0 = 0.5
     cal_f1 = 2.0 * TPR / (TPR + (1.0 / r0) * FPR + 1)
     avg = (f1 + ba + cal_f1 + mcc) / 4.0
-    print(f'{acc:10.3f}{f1:10.3f}{ba:10.3f}{cal_f1:10.3f}{mcc:10.3f}{avg:10.3f}')
+    print(f'{c:>10}'
+          f'{a:>20}'
+          f'{acc:10.3f}'
+          f'{f1:10.3f}'
+          f'{ba:10.3f}'
+          f'{cal_f1:10.3f}'
+          f'{mcc:10.3f}'
+          f'{avg:10.3f}')
 
 
 def main(args):
@@ -74,31 +89,44 @@ def main(args):
 
     df = pd.DataFrame()
 
+    algorithms = [
+        'qtrees',
+        'cshelph',
+        'medianfilter',
+        'bathypathfinder',
+        'openoceans',
+        'openoceanspp',
+        'coastnet',
+        'pointnet',
+        'ensemble',
+        ]
+    algorithms.sort()
+
     for n, fn in enumerate(filenames):
 
         if args.verbose:
-            print(f'Reading {n + 1} of {len(filenames)}: {fn}')
+            print(f'Reading {n + 1} of {len(filenames)}: {fn}', file=sys.stderr)
 
         d = pd.read_csv(fn, engine='pyarrow')
 
         if args.verbose:
-            print(f'Read {len(d.index)} rows')
+            print(f'Read {len(d.index)} rows', file=sys.stderr)
 
-        d = d[['manual_label', 'prediction']]
+        d = d[['manual_label'] + algorithms]
 
         if args.verbose:
-            print(d.columns)
+            print(d.columns, file=sys.stderr)
 
         df = pd.concat([df, d])
 
     if args.verbose:
-        print(f'Final dataframe = {df.shape}')
+        print(f'Final dataframe = {df.shape}', file=sys.stderr)
 
     ref = df['manual_label']
 
     if args.verbose:
         x = ref.unique()
-        print(f'unique(ref): {x}')
+        print(f'unique(ref): {x}', file=sys.stderr)
 
     # Replace NAN's with 0's
     df = df.fillna(0)
@@ -107,25 +135,30 @@ def main(args):
     # Replace 'water column' with 'unclassified'
     df = df.replace(45.0, 0.0)
 
-    print('All labels')
-    score_all(ref, df)
-
-    print('Surface labels')
-    score_binary(ref.copy(), df.copy(), 41)
-
-    print('Bathy labels')
-    score_binary(ref.copy(), df.copy(), 40)
+    n_total = len(df.index)
+    n_noise = len(df[df.manual_label == 0].index)
+    n_bathy = len(df[df.manual_label == 40].index)
+    n_surface = len(df[df.manual_label == 41].index)
+    print(f'total photons {n_total}')
+    print(f'total noise photons {n_noise}')
+    print(f'total bathy photons {n_bathy}')
+    print(f'total surface photons {n_surface}')
 
     # Remove photons labeled as surface
-    print('Non-surface bathy labels')
-    n_before = len(ref)
-    ind = ref.loc[ref == 41].index
-    ref = ref.drop(index=ind)
-    df = df.drop(index=ind)
-    n_after = len(ref)
+    df2 = df[df.manual_label != 41]
+    ref2 = df2['manual_label']
     if args.verbose:
-        print(f'Removed {n_before-n_after} non-bathy photons')
-    score_binary(ref, df, 40)
+        print(f'Removed {n_total-len(df2.index)} surface photons',
+              file=sys.stderr)
+
+    for a in algorithms:
+        score_all('all', a, ref, df)
+
+        score_binary('surface', a, ref, df, 41)
+
+        score_binary('bathy', a, ref, df, 40)
+
+        score_binary('nonsurface', a, ref2, df2, 40)
 
 
 if __name__ == "__main__":
