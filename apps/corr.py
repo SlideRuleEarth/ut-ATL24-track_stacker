@@ -94,8 +94,8 @@ def main(args):
     # Replace 'water column' with 'unclassified'
     df = df.replace(45.0, 0.0)
 
-    df_surface = df.replace(41.0, 0.0)
-    df_bathy = df.replace(40.0, 0.0)
+    df_surface = df.replace(40.0, 0.0)
+    df_bathy = df.replace(41.0, 0.0)
 
     plot_corr('all_corr.png', 'All predictions', df)
     plot_corr('surface_corr.png', 'Surface predictions', df_surface)
