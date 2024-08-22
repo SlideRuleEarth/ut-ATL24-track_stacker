@@ -153,10 +153,16 @@ def main(args):
 
     for a in algorithms:
         if args.verbose:
-            print(f'Scoring {a}')
+            print(f'Scoring {a} all', file=sys.stderr)
         score_all('all', a, ref, df)
+        if args.verbose:
+            print(f'Scoring {a} surface', file=sys.stderr)
         score_binary('surface', a, ref, df, 41)
+        if args.verbose:
+            print(f'Scoring {a} bathy', file=sys.stderr)
         score_binary('bathy', a, ref, df, 40)
+        if args.verbose:
+            print(f'Scoring {a} nonsurface', file=sys.stderr)
         score_binary('nonsurface', a, ref2, df2, 40)
 
 
