@@ -89,18 +89,23 @@ def main(args):
 
     df = pd.DataFrame()
 
-    algorithms = [
-        'qtrees',
-        'cshelph',
-        'medianfilter',
-        'bathypathfinder',
-        'openoceans',
-        'openoceanspp',
-        'coastnet',
-        'pointnet',
-        'ensemble',
-        ]
-    algorithms.sort()
+    if args.ensemble_only:
+        algorithms = [
+            'ensemble',
+            ]
+    else:
+        algorithms = [
+            'qtrees',
+            'cshelph',
+            'medianfilter',
+            'bathypathfinder',
+            'openoceans',
+            'openoceanspp',
+            'coastnet',
+            'pointnet',
+            'ensemble',
+            ]
+        algorithms.sort()
 
     for n, fn in enumerate(filenames):
 
@@ -170,6 +175,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action="store_true", default=False)
+    parser.add_argument('-e', '--ensemble_only', action="store_true", default=False)
     parser.add_argument('input_glob',
                         type=str,
                         help='Input training filename glob')
