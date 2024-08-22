@@ -56,8 +56,10 @@ def main(args):
               f' train')
         print(f'make INPUT="${{tmpdir}}/{split}/*.csv"'
               f' MODEL=${{tmpdir}}/{split}/model.json'
+              f' OUTPUT_DIR=${{tmpdir}}/{split}/predictions'
               f' classify')
         print(f'make --no-print-directory INPUT="${{tmpdir}}/{split}/*.csv"'
+              f' OUTPUT_DIR=${{tmpdir}}/{split}/predictions'
               f' score > cross_val.{split}.txt')
 
 

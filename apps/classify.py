@@ -25,15 +25,15 @@ def main(args):
     df = df.replace(45.0, 0.0)
 
     df = df[['ortho_h',
-           'qtrees',
-           'cshelph',
-           'medianfilter',
-           'bathypathfinder',
-           'openoceans',
-           'openoceanspp',
-           'coastnet',
-           'pointnet',
-           'manual_label']]
+             'qtrees',
+             'cshelph',
+             'medianfilter',
+             'bathypathfinder',
+             'openoceans',
+             'openoceanspp',
+             'coastnet',
+             'pointnet',
+             'manual_label']]
 
     if args.verbose:
         print(df.columns, file=sys.stderr)

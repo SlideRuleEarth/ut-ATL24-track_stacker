@@ -9,7 +9,7 @@ default: help
 ##############################################################################
 
 INPUT=./data/local/merged_Sliderule_v1/*.csv
-OUTPUT=./predictions/*.csv
+OUTPUT_DIR=./predictions
 MODEL=./models/model.json
 EPOCHS=100
 
@@ -32,15 +32,14 @@ train:
 
 .PHONY: classify # Generate predictions
 classify:
-	@mkdir -p predictions
-	@rm -f ./predictions/*
+	@mkdir -p $(OUTPUT_DIR)
 	@ls -1 $(INPUT) \
 		| parallel --verbose --lb --jobs=16 --halt now,fail=1 \
-		"python apps/classify.py --verbose --model-filename=$(MODEL) --output-filename=predictions/{/.}_classified.csv {}"
+		"python apps/classify.py --verbose --model-filename=$(MODEL) --output-filename=$(OUTPUT_DIR)/{/.}_classified.csv {}"
 
 .PHONY: score # Score predictions
 score:
-	@python apps/score.py --verbose "$(OUTPUT)"
+	@python apps/score.py --verbose "$(OUTPUT_DIR)/*.csv"
 
 .PHONY: cross_validate # Cross validate track stacker
 cross_validate:
