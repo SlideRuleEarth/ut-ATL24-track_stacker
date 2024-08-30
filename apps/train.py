@@ -104,7 +104,8 @@ def main(args):
     y[y == 40] = 1
     y[y == 41] = 2
 
-    clf = xgb.XGBClassifier(device='cuda')
+    max_depth = 6
+    clf = xgb.XGBClassifier(device='cuda', max_depth=max_depth)
 
     if args.verbose:
         print('Fitting...', file=sys.stderr)
