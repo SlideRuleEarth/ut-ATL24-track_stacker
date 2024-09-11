@@ -1,6 +1,5 @@
 data
 venv
-models
 predictions
 all_corr.png
 bathy_corr.png
