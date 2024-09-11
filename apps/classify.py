@@ -24,6 +24,8 @@ def main(args):
     # Replace 'water column' with 'unclassified'
     df = df.replace(45.0, 0.0)
 
+    # Save photon indexes
+    index_ph = df[['index_ph']]
     df = df[['ortho_h',
              'qtrees',
              'cshelph',
@@ -70,6 +72,9 @@ def main(args):
     # Change labels back to APSRS
     df[df == 1] = 40
     df[df == 2] = 41
+
+    # Add the indexes
+    df["index_ph"] = index_ph
 
     # Save results
     df.to_csv(args.output_filename, index=False)
