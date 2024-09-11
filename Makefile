@@ -8,7 +8,7 @@ default: help
 #
 ##############################################################################
 
-INPUT=./data/local/merged_Sliderule_v2/*.csv
+INPUT=./data/remote/latest/*.csv
 OUTPUT_DIR=./predictions
 MODEL=./models/model.json
 EPOCHS=100
@@ -39,7 +39,7 @@ classify:
 
 .PHONY: score # Score predictions
 score:
-	@python apps/score.py --verbose "$(OUTPUT_DIR)/*.csv"
+	@python apps/score.py --verbose "$(OUTPUT_DIR)/*.csv" > scores.txt
 
 .PHONY: cross_validate # Cross validate track stacker
 cross_validate:
