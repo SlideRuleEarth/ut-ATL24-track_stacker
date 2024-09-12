@@ -14,27 +14,28 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import matthews_corrcoef
 
 
-def score_all(c, a, r, d):
+def score_all(c, a, r, d, headers=False):
 
-    print(f'{"Cls":>10}'
-          f'{"Name":>20}'
-          f'{"Accuracy":>10}'
-          f'{"WghtF1":>10}'
-          f'{"MacroF1":>10}')
+    if headers is True:
+        print(f'Cls'
+              f'\tName'
+              f'\tAccuracy'
+              f'\tWghtF1'
+              f'\tMacroF1')
 
     # Get the scores
     p = d[a]
     acc = accuracy_score(r, p)
     weighted_f1 = f1_score(r, p, average="weighted")
     macro_f1 = f1_score(r, p, average="macro")
-    print(f'{c:>10}'
-          f'{a:>20}'
-          f'{acc:10.3f}'
-          f'{weighted_f1:10.3f}'
-          f'{macro_f1:10.3f}')
+    print(f'{c}'
+          f'\t{a}'
+          f'\t{acc:0.3f}'
+          f'\t{weighted_f1:0.3f}'
+          f'\t{macro_f1:0.3f}')
 
 
-def score_binary(c, a, ref, df, pos_label):
+def score_binary(c, a, ref, df, pos_label, headers=False):
 
     # Replace values
     r = ref.copy()
@@ -42,15 +43,16 @@ def score_binary(c, a, ref, df, pos_label):
     r[r != pos_label] = 0
     d[d != pos_label] = 0
 
-    print(f'{"Cls":>10}'
-          f'{"Name":>20}'
-          f'{"Accuracy":>10}'
-          f'{"F1":>10}'
-          f'{"BA":>10}'
-          f'{"calF1":>10}'
-          f'{"MCC":>10}'
-          f'{"avg4":>10}'
-          )
+    if headers is True:
+        print(f'Cls'
+              f'\tName'
+              f'\tAccuracy'
+              f'\tF1'
+              f'\tBA'
+              f'\tcalF1'
+              f'\tMCC'
+              f'\tavg4'
+              )
 
     # Get the scores
     p = d[a]
@@ -68,14 +70,14 @@ def score_binary(c, a, ref, df, pos_label):
     r0 = 0.5
     cal_f1 = 2.0 * TPR / (TPR + (1.0 / r0) * FPR + 1)
     avg = (f1 + ba + cal_f1 + mcc) / 4.0
-    print(f'{c:>10}'
-          f'{a:>20}'
-          f'{acc:10.3f}'
-          f'{f1:10.3f}'
-          f'{ba:10.3f}'
-          f'{cal_f1:10.3f}'
-          f'{mcc:10.3f}'
-          f'{avg:10.3f}')
+    print(f'{c}'
+          f'\t{a}'
+          f'\t{acc:0.3f}'
+          f'\t{f1:0.3f}'
+          f'\t{ba:0.3f}'
+          f'\t{cal_f1:0.3f}'
+          f'\t{mcc:0.3f}'
+          f'\t{avg:0.3f}')
 
 
 def main(args):
@@ -110,7 +112,8 @@ def main(args):
     for n, fn in enumerate(filenames):
 
         if args.verbose:
-            print(f'Reading {n + 1} of {len(filenames)}: {fn}', file=sys.stderr)
+            print(f'Reading {n + 1} of {len(filenames)}: {fn}',
+                  file=sys.stderr)
 
         d = pd.read_csv(fn, engine='pyarrow')
 
@@ -144,38 +147,41 @@ def main(args):
     n_noise = len(df[df.manual_label == 0].index)
     n_bathy = len(df[df.manual_label == 40].index)
     n_surface = len(df[df.manual_label == 41].index)
-    print(f'total photons {n_total}')
-    print(f'total noise photons {n_noise}')
-    print(f'total bathy photons {n_bathy}')
-    print(f'total surface photons {n_surface}')
+    print(f'total photons {n_total}', file=sys.stderr)
+    print(f'total noise photons {n_noise}', file=sys.stderr)
+    print(f'total bathy photons {n_bathy}', file=sys.stderr)
+    print(f'total surface photons {n_surface}', file=sys.stderr)
 
-    # Remove photons labeled as surface
-    df2 = df[df.manual_label != 41]
-    ref2 = df2['manual_label']
-    if args.verbose:
-        print(f'Removed {n_total-len(df2.index)} surface photons',
-              file=sys.stderr)
+    for n, a in enumerate(algorithms):
+        headers = True if n == 0 else False
 
-    for a in algorithms:
         if args.verbose:
-            print(f'Scoring {a} all', file=sys.stderr)
-        score_all('all', a, ref, df)
-        if args.verbose:
-            print(f'Scoring {a} surface', file=sys.stderr)
-        score_binary('surface', a, ref, df, 41)
-        if args.verbose:
-            print(f'Scoring {a} bathy', file=sys.stderr)
-        score_binary('bathy', a, ref, df, 40)
-        if args.verbose:
-            print(f'Scoring {a} nonsurface', file=sys.stderr)
-        score_binary('nonsurface', a, ref2, df2, 40)
+            print(f'Scoring {a}', file=sys.stderr)
+
+        if args.all:
+            score_all('all', a, ref, df, headers)
+        else:
+            # Remove photons labeled as surface
+            df2 = df[df.manual_label != 41]
+            ref2 = df2['manual_label']
+            if args.verbose:
+                print(f'Removed {n_total-len(df2.index)} surface photons',
+                      file=sys.stderr)
+
+            score_binary('surface', a, ref, df, 41, headers)
+            score_binary('bathy', a, ref, df, 40)
+            score_binary('nonsurface', a, ref2, df2, 40)
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', action="store_true", default=False)
-    parser.add_argument('-e', '--ensemble_only', action="store_true", default=False)
+    parser.add_argument('-v', '--verbose',
+                        action="store_true", default=False)
+    parser.add_argument('-a', '--all', action='store_true',
+                        help='Score all classes together')
+    parser.add_argument('-e', '--ensemble_only',
+                        action="store_true", default=False)
     parser.add_argument('input_glob',
                         type=str,
                         help='Input training filename glob')

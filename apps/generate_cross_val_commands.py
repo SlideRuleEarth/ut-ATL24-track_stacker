@@ -60,7 +60,10 @@ def main(args):
               f' classify')
         print(f'make --no-print-directory INPUT="${{tmpdir}}/{split}/*.csv"'
               f' OUTPUT_DIR=${{tmpdir}}/{split}/predictions'
-              f' score > cross_val.{split}.txt')
+              f' score_all > cross_val.all.{split}.txt')
+        print(f'make --no-print-directory INPUT="${{tmpdir}}/{split}/*.csv"'
+              f' OUTPUT_DIR=${{tmpdir}}/{split}/predictions'
+              f' score_binary > cross_val.binary.{split}.txt')
 
 
 if __name__ == "__main__":

@@ -13,15 +13,6 @@ OUTPUT_DIR=./predictions
 MODEL=./models/model.json
 EPOCHS=100
 
-.PHONY: corr # Compute correlations between predictions
-corr:
-	@python apps/corr.py \
-		--verbose \
-		"$(INPUT)"
-	@eog all_corr.png &
-	@eog surface_corr.png &
-	@eog bathy_corr.png &
-
 .PHONY: train # Train a model
 train:
 	@./apps/train.py \
@@ -39,7 +30,14 @@ classify:
 
 .PHONY: score # Score predictions
 score:
-	@python apps/score.py --verbose "$(OUTPUT_DIR)/*.csv" > scores.txt
+	make --no-print-directory score_all > scores.all.txt
+	make --no-print-directory score_binary > scores.binary.txt
+
+score_all:
+	@python apps/score.py --verbose --all "$(OUTPUT_DIR)/*.csv"
+
+score_binary:
+	@python apps/score.py --verbose "$(OUTPUT_DIR)/*.csv"
 
 .PHONY: cross_validate # Cross validate track stacker
 cross_validate:
@@ -49,6 +47,39 @@ cross_validate:
 		"$(INPUT)" > ./cross_validate.bash
 	@bash ./cross_validate.bash
 	@rm ./cross_validate.bash
+
+##############################################################################
+#
+# Show result plots
+#
+##############################################################################
+
+.PHONY: plot_corr # Plot correlations between predictions
+plot_corr:
+	@python apps/plot_corr.py \
+		--verbose \
+		"$(INPUT)"
+	@eog all_corr.png &
+	@eog surface_corr.png &
+	@eog bathy_corr.png &
+
+.PHONY: plot_multi_class # Plot performance
+plot_multi_class:
+	@python ./apps/plot_multi_class.py scores.all.txt
+	@python ./apps/plot_multi_class.py cross_val.all.0.txt
+	@python ./apps/plot_multi_class.py cross_val.all.1.txt
+	@python ./apps/plot_multi_class.py cross_val.all.2.txt
+	@python ./apps/plot_multi_class.py cross_val.all.3.txt
+	@python ./apps/plot_multi_class.py cross_val.all.4.txt
+
+.PHONY: plot_binary # Plot performance
+plot_binary:
+	@python ./apps/plot_binary.py scores.binary.txt
+	@python ./apps/plot_binary.py cross_val.binary.0.txt
+	@python ./apps/plot_binary.py cross_val.binary.1.txt
+	@python ./apps/plot_binary.py cross_val.binary.2.txt
+	@python ./apps/plot_binary.py cross_val.binary.3.txt
+	@python ./apps/plot_binary.py cross_val.binary.4.txt
 
 ##############################################################################
 #
