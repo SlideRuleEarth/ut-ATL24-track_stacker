@@ -21,18 +21,21 @@ def score_all(c, a, r, d, headers=False):
               f'\tName'
               f'\tAccuracy'
               f'\tWghtF1'
-              f'\tMacroF1')
+              f'\tMacroF1'
+              f'\tMicroF1')
 
     # Get the scores
     p = d[a]
     acc = accuracy_score(r, p)
     weighted_f1 = f1_score(r, p, average="weighted")
     macro_f1 = f1_score(r, p, average="macro")
+    micro_f1 = f1_score(r, p, average="micro")
     print(f'{c}'
           f'\t{a}'
           f'\t{acc:0.3f}'
           f'\t{weighted_f1:0.3f}'
-          f'\t{macro_f1:0.3f}')
+          f'\t{macro_f1:0.3f}',
+          f'\t{micro_f1:0.3f}')
 
 
 def score_binary(c, a, ref, df, pos_label, headers=False):
