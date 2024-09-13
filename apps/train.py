@@ -41,6 +41,7 @@ def main(args):
             print(f'Read {len(df.index)} rows')
 
         d = d[['ortho_h',
+               'surface_h',
                'qtrees',
                'cshelph',
                'medianfilter',
@@ -93,6 +94,7 @@ def main(args):
 
     features = algorithms.copy()
     features.append('ortho_h')
+    features.append('surface_h')
 
     if args.verbose:
         print('Features:', features)
