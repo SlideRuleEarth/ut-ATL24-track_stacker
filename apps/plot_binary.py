@@ -34,12 +34,11 @@ def plot(fn, title, df):
     for s, d in scores.items():
         x = n + width * c
         x = x - width * len(scores) / 2.0 + width / 2.0
-        print(x)
         y = ax.bar(x, d, width, label=s)
         ax.bar_label(y, label_type='edge')
         c += 1
 
-    ax.legend(loc='upper center', ncols=5)
+    ax.legend(loc='lower center', ncols=5)
     plt.xticks(range(len(df.Name)), df.Name, rotation=90)
     plt.title(title, fontsize=16)
     plt.show()
@@ -60,7 +59,6 @@ def main(args):
 
     # Read it
     df = pd.read_csv(fn, engine='pyarrow', sep='\t')
-    print(df)
 
     # Don't plot OpenOceans
     df = df[df.Name != 'openoceans']

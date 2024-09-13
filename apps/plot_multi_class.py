@@ -15,7 +15,6 @@ def plot(fn, title, x):
 
     ax.set_title(title)
     ax.set_ylim(0.0, 1.0)
-    print(x.columns)
     y=ax.bar(x.Name, x.WghtF1, label='Weighted F1')
     ax.bar_label(y, label_type='edge')
     y=ax.bar(x.Name, x.MacroF1, label='Macro F1')
@@ -41,7 +40,6 @@ def main(args):
 
     # Read it
     df = pd.read_csv(fn, engine='pyarrow', sep='\t')
-    print(df)
 
     # Don't plot OpenOceans
     df = df[df.Name != 'openoceans']
