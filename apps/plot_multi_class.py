@@ -19,8 +19,6 @@ def plot(fn, title, x):
     ax.bar_label(y, label_type='edge')
     y = ax.bar(x.Name, x.MacroF1, label='Macro F1')
     ax.bar_label(y, label_type='edge')
-    y = ax.bar(x.Name, x.MicroF1, label='Micro F1')
-    ax.bar_label(y, label_type='edge')
     ax.legend(loc='lower center', ncols=2)
     plt.xticks(range(len(x.Name)), x.Name, rotation=90)
     plt.title(title, fontsize=16)
