@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 
 
-def plot(fn, title, df):
+def plot(title, df):
 
     # print(plt.style.available)
     # plt.style.use('seaborn-v0_8-whitegrid')
@@ -42,7 +42,6 @@ def plot(fn, title, df):
     plt.xticks(range(len(df.Name)), df.Name, rotation=90)
     plt.title(title, fontsize=16)
     plt.show()
-    # plt.savefig(fn)
 
 
 def main(args):
@@ -68,9 +67,9 @@ def main(args):
     df3 = df[df.Cls == 'nonsurface']
 
     # Plot it
-    plot(fn, 'Sea surface scores: ' + fn, df1)
-    plot(fn, 'Bathy scores: ' + fn, df2)
-    plot(fn, 'Non-surface scores: ' + fn, df3)
+    plot('Sea surface scores: ' + fn, df1)
+    plot('Bathy scores: ' + fn, df2)
+    plot('Non-surface scores: ' + fn, df3)
 
 
 if __name__ == "__main__":
