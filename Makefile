@@ -81,6 +81,15 @@ plot_binary:
 	@python ./apps/plot_binary.py cross_val.binary.3.txt
 	@python ./apps/plot_binary.py cross_val.binary.4.txt
 
+.PHONY: plot_f1 # Plot performance
+plot_f1:
+	@python ./apps/plot_f1.py scores.binary.txt
+	@python ./apps/plot_f1.py cross_val.binary.0.txt
+	@python ./apps/plot_f1.py cross_val.binary.1.txt
+	@python ./apps/plot_f1.py cross_val.binary.2.txt
+	@python ./apps/plot_f1.py cross_val.binary.3.txt
+	@python ./apps/plot_f1.py cross_val.binary.4.txt
+
 ##############################################################################
 #
 # Get help by running
