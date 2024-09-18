@@ -104,7 +104,6 @@ def main(args):
             'cshelph',
             'medianfilter',
             'bathypathfinder',
-            'openoceans',
             'openoceanspp',
             'coastnet',
             'pointnet',
