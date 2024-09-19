@@ -182,7 +182,7 @@ if __name__ == "__main__":
                         action="store_true", default=False)
     parser.add_argument('-a', '--all', action='store_true',
                         help='Score all classes together')
-    parser.add_argument('-e', '--ensemble_only',
+    parser.add_argument('-e', '--ensemble-only',
                         action="store_true", default=False)
     parser.add_argument('input_glob',
                         type=str,
