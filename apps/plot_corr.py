@@ -53,7 +53,7 @@ def main(args):
             QTREES_LABEL = 'prediction'
 
         d = d[['index_ph',
-               'ortho_h',
+               'geoid_corr_h',
                QTREES_LABEL,
                'cshelph',
                'medianfilter',

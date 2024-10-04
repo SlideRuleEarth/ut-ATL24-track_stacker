@@ -40,7 +40,7 @@ def main(args):
         if args.verbose:
             print(f'Read {len(df.index)} rows')
 
-        d = d[['ortho_h',
+        d = d[['geoid_corr_h',
                'surface_h',
                'qtrees',
                'cshelph',
@@ -91,7 +91,7 @@ def main(args):
             print(f'unique({col}): {x}')
 
     features = algorithms.copy()
-    features.append('ortho_h')
+    features.append('geoid_corr_h')
     features.append('surface_h')
 
     if args.verbose:

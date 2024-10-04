@@ -26,7 +26,7 @@ def main(args):
 
     # Save photon indexes
     index_ph = df[['index_ph']]
-    df = df[['ortho_h',
+    df = df[['geoid_corr_h',
              'surface_h',
              'qtrees',
              'cshelph',
