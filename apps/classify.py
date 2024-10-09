@@ -34,7 +34,6 @@ def main(args):
              'bathypathfinder',
              'openoceanspp',
              'coastnet',
-             'pointnet',
              'manual_label']]
 
     if args.verbose:
