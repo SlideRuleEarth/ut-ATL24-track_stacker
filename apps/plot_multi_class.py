@@ -14,7 +14,7 @@ def plot(fn, title, x):
     fig, ax = plt.subplots(layout='constrained')
 
     ax.set_title(title)
-    ax.set_ylim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.1)
     y = ax.bar(x.Name, x.WghtF1, label='Weighted F1')
     ax.bar_label(y, label_type='edge')
     y = ax.bar(x.Name, x.MacroF1, label='Macro F1')
@@ -45,7 +45,7 @@ def main(args):
     df = df[df.Name != 'openoceans']
 
     # Plot it
-    plot(fn, 'Multi-class scores: ' + fn, df)
+    plot(fn, 'ATL24 multi-class F1 scores', df)
 
 
 if __name__ == "__main__":

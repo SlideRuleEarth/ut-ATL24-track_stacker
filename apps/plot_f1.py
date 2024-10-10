@@ -18,7 +18,7 @@ def plot(title, df):
     fig, ax = plt.subplots(layout='constrained')
 
     ax.set_title(title)
-    ax.set_ylim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.1)
     ax.grid(axis='y')
     ax.set_axisbelow(True)
 
