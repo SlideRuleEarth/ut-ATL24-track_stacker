@@ -93,7 +93,7 @@ plot_f1:
 .PHONY: plot # Plot performance
 plot:
 	@python ./apps/plot_multi_class.py scores.all.txt
-	@python ./apps/plot.py scores.binary.txt
+	@python ./apps/plot_surface_bathy.py scores.binary.txt
 
 ##############################################################################
 #
