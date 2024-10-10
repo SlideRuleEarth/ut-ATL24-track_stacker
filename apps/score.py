@@ -106,7 +106,6 @@ def main(args):
             'bathypathfinder',
             'openoceanspp',
             'coastnet',
-            'pointnet',
             'ensemble',
             ]
         algorithms.sort()

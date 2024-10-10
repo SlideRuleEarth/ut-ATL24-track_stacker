@@ -90,6 +90,11 @@ plot_f1:
 	@python ./apps/plot_f1.py cross_val.binary.3.txt
 	@python ./apps/plot_f1.py cross_val.binary.4.txt
 
+.PHONY: plot # Plot performance
+plot:
+	@python ./apps/plot_multi_class.py scores.all.txt
+	@python ./apps/plot.py scores.binary.txt
+
 ##############################################################################
 #
 # Get help by running

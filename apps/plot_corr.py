@@ -60,7 +60,6 @@ def main(args):
                'bathypathfinder',
                'openoceanspp',
                'coastnet',
-               'pointnet',
                'manual_label']]
         d.rename(columns={"prediction": "qtrees"})
 
@@ -79,7 +78,6 @@ def main(args):
         'cshelph',
         'medianfilter',
         'openoceanspp',
-        'pointnet',
         'qtrees',
         ]
 
