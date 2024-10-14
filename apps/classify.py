@@ -28,6 +28,11 @@ def main(args):
 
     # Save photon indexes
     index_ph = df[['index_ph']]
+
+    # Save along track distance
+    x_atc = df[['x_atc']]
+
+    # Keep only the columns we need
     df = df[['geoid_corr_h',
              'surface_h',
              'qtrees',
@@ -67,6 +72,9 @@ def main(args):
     if args.verbose:
         print(f'Weighted F1\t{f1:.3f}', file=sys.stderr)
         print(f'Balanced accuracy\t{ba:.3f}', file=sys.stderr)
+
+    # Add back x_atc column for viewing
+    df["x_atc"] = x_atc
 
     # Assign predictions
     df["ensemble"] = p
