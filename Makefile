@@ -13,8 +13,12 @@ OUTPUT_DIR=./predictions
 MODEL=./models/model.json
 EPOCHS=100
 
+.PHONY: check_hashes # Check git local and remote repo hashs
+check_hashes:
+	@bash ./scripts/check_git_hashes.bash
+
 .PHONY: train # Train a model
-train:
+train: check_hashes
 	@./apps/train.py \
 		--verbose \
 		--epochs=$(EPOCHS) \
@@ -22,7 +26,7 @@ train:
 		"$(INPUT)"
 
 .PHONY: classify # Generate predictions
-classify:
+classify: check_hashes
 	@mkdir -p $(OUTPUT_DIR)
 	@ls -1 $(INPUT) \
 		| parallel --verbose --lb --jobs=16 --halt now,fail=1 \
