@@ -23,6 +23,8 @@ def main(args):
     df = df.replace(1.0, 0.0)
     # Replace 'water column' with 'unclassified'
     df = df.replace(45.0, 0.0)
+    # Make sure manual label is an int
+    df[['manual_label']] = df[['manual_label']].astype(int)
 
     # Save photon indexes
     index_ph = df[['index_ph']]
@@ -53,6 +55,7 @@ def main(args):
         print('Predicting...', file=sys.stderr)
 
     p = clf.predict(x)
+    q = clf.predict_proba(x)[:, 1]
     r = classification_report(y, p, digits=3)
 
     if args.verbose:
@@ -67,6 +70,7 @@ def main(args):
 
     # Assign predictions
     df["ensemble"] = p
+    df["ensemble_bathy_prob"] = q
 
     # Change labels back to APSRS
     df[df == 1] = 40
@@ -76,7 +80,7 @@ def main(args):
     df["index_ph"] = index_ph
 
     # Save results
-    df.to_csv(args.output_filename, index=False)
+    df.to_csv(args.output_filename, index=False, float_format='%.7f')
 
 
 if __name__ == "__main__":
