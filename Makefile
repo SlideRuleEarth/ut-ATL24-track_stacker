@@ -110,6 +110,7 @@ plot_f1:
 plot:
 	@python ./apps/plot_multi_class.py scores.all.txt
 	@python ./apps/plot_surface_bathy.py scores.binary.txt
+	@python ./apps/plot_surface_bathy.py cross_val.binary.?.txt
 
 ##############################################################################
 #

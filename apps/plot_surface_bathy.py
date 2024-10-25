@@ -4,12 +4,32 @@ ATL24 Bathy Track Stacker
 """
 
 import argparse
-import sys
+import copy
 import matplotlib.pyplot as plt
 import pandas as pd
+import sys
 
 
-def plot(df):
+def avg(dfs):
+
+    # Get the first one
+    df = copy.deepcopy(dfs[0])
+
+    cols = ['Accuracy', 'F1', 'BA', 'calF1', 'MCC', 'avg4']
+
+    # Add the rest
+    for tmp in dfs[1:]:
+        for col in cols:
+            df[col] = df[col] + tmp[col]
+
+    # Get the average
+    for col in cols:
+        df[col] = df[col] / len(dfs)
+
+    return df
+
+
+def plot(title, df):
 
     # print(plt.style.available)
     # ['Solarize_Light2', '_classic_test_patch', '_mpl-gallery',
@@ -24,8 +44,6 @@ def plot(df):
     # plt.style.use('seaborn-v0_8')
 
     fig, ax = plt.subplots(layout='constrained')
-
-    title = "ATL24 binary F1 Scores"
 
     df1 = df[df.Cls == 'surface']
     df2 = df[df.Cls == 'bathy']
@@ -49,20 +67,34 @@ def main(args):
     if args.verbose:
         print(args, file=sys.stderr)
 
-    # Get the filename
-    fn = args.input_filename
+    # Get the filenames
+    fns = args.input_filenames
 
     if args.verbose:
-        print(f'Input result file = {fn}', file=sys.stderr)
+        print(f'Input result files = {fns}', file=sys.stderr)
 
-    # Read it
-    df = pd.read_csv(fn, engine='pyarrow', sep='\t')
+    if len(fns) == 1:
+
+        # Read it
+        df = pd.read_csv(fns[0], engine='pyarrow', sep='\t')
+
+    else:
+
+        dfs = []
+
+        # Get a list of dataframes
+        for fn in fns:
+            dfs.append(pd.read_csv(fn, engine='pyarrow', sep='\t'))
+
+        # Get averages
+        df = avg(dfs)
 
     # Don't plot OpenOceans
     df = df[df.Name != 'openoceans']
 
     # Plot it
-    plot(df)
+    title = f"ATL24 binary F1 Scores ({len(fns)} files)"
+    plot(title, df)
 
 
 if __name__ == "__main__":
@@ -73,9 +105,10 @@ if __name__ == "__main__":
         '-v', '--verbose', action='store_true',
         help='Show verbose output')
     parser.add_argument(
-        'input_filename',
+        'input_filenames',
         type=str,
-        help='Input results text filename ')
+        nargs='+',
+        help='Input results text filenames')
 
     args = parser.parse_args()
 
