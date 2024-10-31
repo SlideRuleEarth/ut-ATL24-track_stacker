@@ -11,7 +11,6 @@ default: help
 INPUT=./data/remote/latest/*.csv
 OUTPUT_DIR=./predictions
 MODEL=./models/model.json
-EPOCHS=100
 
 .PHONY: check_hashes # Check git local and remote repo hashs
 check_hashes:
@@ -21,7 +20,6 @@ check_hashes:
 train: check_hashes
 	@./apps/train.py \
 		--verbose \
-		--epochs=$(EPOCHS) \
 		--model-filename=$(MODEL) \
 		"$(INPUT)"
 
