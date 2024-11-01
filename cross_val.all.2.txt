@@ -1,8 +1,8 @@
 Cls	Name	Accuracy	WghtF1	MacroF1	MicroF1
-all	bathypathfinder	0.928	0.926	0.683 	0.928
-all	coastnet	0.943	0.944	0.869 	0.943
-all	cshelph	0.937	0.936	0.774 	0.937
-all	ensemble	0.954	0.954	0.901 	0.954
-all	medianfilter	0.941	0.942	0.856 	0.941
-all	openoceanspp	0.949	0.949	0.868 	0.949
-all	qtrees	0.907	0.908	0.797 	0.907
+all	bathypathfinder	0.951	0.949	0.674 	0.951
+all	coastnet	0.960	0.962	0.860 	0.960
+all	cshelph	0.957	0.955	0.757 	0.957
+all	ensemble	0.961	0.961	0.891 	0.961
+all	medianfilter	0.959	0.959	0.829 	0.959
+all	openoceanspp	0.943	0.945	0.801 	0.943
+all	qtrees	0.945	0.945	0.818 	0.945
