@@ -7,15 +7,7 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import balanced_accuracy_score
 
 
-def main(args):
-
-    # Show args
-    if args.verbose:
-        print('input_filename:', args.input_filename, file=sys.stderr)
-        print('model_filename:', args.model_filename, file=sys.stderr)
-        print('output_filename:', args.output_filename, file=sys.stderr)
-
-    df = pd.read_csv(args.input_filename, engine='pyarrow')
+def classify(df, verbose, model_filename):
 
     # Replace NAN's with 0's
     df = df.fillna(0)
@@ -43,7 +35,7 @@ def main(args):
              'coastnet',
              'manual_label']]
 
-    if args.verbose:
+    if verbose:
         print(df.columns, file=sys.stderr)
 
     x = df.drop('manual_label', axis=1).to_numpy()
@@ -54,22 +46,22 @@ def main(args):
     y[y == 41] = 2
 
     clf = xgb.XGBClassifier(device='cpu')
-    clf.load_model(args.model_filename)
+    clf.load_model(model_filename)
 
-    if args.verbose:
+    if verbose:
         print('Predicting...', file=sys.stderr)
 
     p = clf.predict(x)
     q = clf.predict_proba(x)[:, 1]
     r = classification_report(y, p, digits=3)
 
-    if args.verbose:
+    if verbose:
         print(r, file=sys.stderr)
 
     f1 = f1_score(y, p, average='weighted')
     ba = balanced_accuracy_score(y, p)
 
-    if args.verbose:
+    if verbose:
         print(f'Weighted F1\t{f1:.3f}', file=sys.stderr)
         print(f'Balanced accuracy\t{ba:.3f}', file=sys.stderr)
 
@@ -86,6 +78,23 @@ def main(args):
 
     # Add the indexes
     df["index_ph"] = index_ph
+
+    return df
+
+
+def main(args):
+
+    # Show args
+    if args.verbose:
+        print('input_filename:', args.input_filename, file=sys.stderr)
+        print('model_filename:', args.model_filename, file=sys.stderr)
+        print('output_filename:', args.output_filename, file=sys.stderr)
+
+    # Get the dataframe
+    df = pd.read_csv(args.input_filename, engine='pyarrow')
+
+    # Get predictions
+    df = classify(df, args.verbose, args.model_filename)
 
     # Save results
     df.to_csv(args.output_filename, index=False, float_format='%.7f')
