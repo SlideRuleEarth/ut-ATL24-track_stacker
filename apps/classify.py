@@ -53,15 +53,13 @@ def classify(df, verbose, model_filename):
 
     p = clf.predict(x)
     q = clf.predict_proba(x)[:, 1]
-    r = classification_report(y, p, digits=3)
 
     if verbose:
+        r = classification_report(y, p, digits=3)
+        f1 = f1_score(y, p, average='weighted')
+        ba = balanced_accuracy_score(y, p)
+
         print(r, file=sys.stderr)
-
-    f1 = f1_score(y, p, average='weighted')
-    ba = balanced_accuracy_score(y, p)
-
-    if verbose:
         print(f'Weighted F1\t{f1:.3f}', file=sys.stderr)
         print(f'Balanced accuracy\t{ba:.3f}', file=sys.stderr)
 
