@@ -100,15 +100,14 @@ def main(args):
             ]
     else:
         algorithms = [
-            'qtrees',
+            'bathypathfinder',
+            'coastnet',
             'cshelph',
             'medianfilter',
-            'bathypathfinder',
             'openoceanspp',
-            'coastnet',
+            'qtrees',
             'ensemble',
             ]
-        algorithms.sort()
 
     for n, fn in enumerate(filenames):
 
