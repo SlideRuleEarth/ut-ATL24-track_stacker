@@ -16,6 +16,11 @@ def classify(df, verbose, model_filename):
     df = df.replace(1.0, 0.0)
     # Replace 'water column' with 'unclassified'
     df = df.replace(45.0, 0.0)
+
+    # Add a manual label column if one does not exist
+    if 'manual_label' not in df.columns:
+        df[['manual_label']] = 0
+
     # Make sure manual label is an int
     df[['manual_label']] = df[['manual_label']].astype(int)
 
