@@ -5,6 +5,7 @@ import xgboost as xgb
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.neighbors import LocalOutlierFactor
 
 
 def classify(df, verbose, model_filename):
@@ -24,6 +25,30 @@ def classify(df, verbose, model_filename):
     # Save along track distance
     x_atc = df[['x_atc']]
 
+    # Get indexes of points marked as bathy
+    indexes = df.index[(df['qtrees'] == 40) |
+                       (df['cshelph'] == 40) |
+                       (df['medianfilter'] == 40) |
+                       (df['bathypathfinder'] == 40) |
+                       (df['openoceanspp'] == 40) |
+                       (df['coastnet'] == 40)]
+
+    # Get a list of 2D points
+    p = df[['x_atc', 'geoid_corr_h']].to_numpy()
+    p = p[indexes]
+
+    # Apply aspect ratio
+    aspect_ratio = 10
+    p[0, :] /= aspect_ratio
+
+    # Compute Local Outlier Factor
+    n_neighbors = 16
+    lof = LocalOutlierFactor(n_neighbors=n_neighbors)
+    lof.fit(p)
+
+    # Get densities
+    density = lof.negative_outlier_factor_
+
     # Keep only the columns we need
     df = df[['geoid_corr_h',
              'surface_h',
@@ -34,6 +59,10 @@ def classify(df, verbose, model_filename):
              'openoceanspp',
              'coastnet',
              'manual_label']]
+
+    # Add the density
+    df['density'] = density.max()
+    df.loc[indexes, 'density'] = density
 
     if verbose:
         print(df.columns, file=sys.stderr)

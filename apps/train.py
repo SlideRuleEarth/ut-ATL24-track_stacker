@@ -12,6 +12,7 @@ from sklearn.inspection import permutation_importance
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.neighbors import LocalOutlierFactor
 
 
 def main(args):
@@ -38,7 +39,31 @@ def main(args):
         d = pd.read_csv(fn, engine='pyarrow')
 
         if args.verbose:
-            print(f'Read {len(df.index)} rows')
+            print(f'Read {len(d.index)} rows')
+
+        # Get indexes of points marked as bathy
+        indexes = d.index[(d['qtrees'] == 40) |
+                          (d['cshelph'] == 40) |
+                          (d['medianfilter'] == 40) |
+                          (d['bathypathfinder'] == 40) |
+                          (d['openoceanspp'] == 40) |
+                          (d['coastnet'] == 40)]
+
+        # Get a list of 2D points
+        p = d[['x_atc', 'geoid_corr_h']].to_numpy()
+        p = p[indexes]
+
+        # Apply aspect ratio
+        aspect_ratio = 10
+        p[0, :] /= aspect_ratio
+
+        # Compute Local Outlier Factor
+        n_neighbors = 16
+        lof = LocalOutlierFactor(n_neighbors=n_neighbors)
+        lof.fit(p)
+
+        # Get densities
+        density = lof.negative_outlier_factor_
 
         d = d[['geoid_corr_h',
                'surface_h',
@@ -49,6 +74,10 @@ def main(args):
                'openoceanspp',
                'coastnet',
                'manual_label']]
+
+        # Add the density
+        d['density'] = density.max()
+        d.loc[indexes, 'density'] = density
 
         if args.verbose:
             print(d.columns)
@@ -91,6 +120,7 @@ def main(args):
     features = algorithms.copy()
     features.append('geoid_corr_h')
     features.append('surface_h')
+    features.append('density')
 
     if args.verbose:
         print('Features:', features)
@@ -116,20 +146,23 @@ def main(args):
     clf.save_model(args.model_filename)
 
     if args.verbose:
-        print('Getting predictions...')
+        print('Getting predictions...', file=sys.stderr)
 
     p = clf.predict(x)
-    r = classification_report(y, p, digits=3)
-    print(r)
-    f1 = f1_score(y, p, average='weighted')
-    ba = balanced_accuracy_score(y, p)
-    print(f'Weighted F1\t{f1:.3f}')
-    print(f'Balanced accuracy\t{ba:.3f}')
 
-    # Get feature importances
-    print(f'{"col":>20}{"importance":>20}')
-    for n, col in enumerate(x.columns):
-        print(f'{col:>20}{clf.feature_importances_[n]:20.5f}')
+    if args.verbose:
+        r = classification_report(y, p, digits=3)
+        f1 = f1_score(y, p, average='weighted')
+        ba = balanced_accuracy_score(y, p)
+        print(r, file=sys.stderr)
+        print(f'Weighted F1\t{f1:.3f}', file=sys.stderr)
+        print(f'Balanced accuracy\t{ba:.3f}', file=sys.stderr)
+
+        # Get feature importances
+        print(f'{"col":>20}{"importance":>20}', file=sys.stderr)
+        for n, col in enumerate(x.columns):
+            print(f'{col:>20}{clf.feature_importances_[n]:20.5f}',
+                  file=sys.stderr)
 
     if args.permutation_importances:
         print('Getting permutation importances...')
