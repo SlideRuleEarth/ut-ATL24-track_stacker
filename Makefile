@@ -110,6 +110,12 @@ plot:
 	@python ./apps/plot_surface_bathy.py scores.binary.txt
 	@python ./apps/plot_surface_bathy.py cross_val.binary.?.txt
 
+.PHONY: plot3 # Plot performance of three selected algorithms
+plot3:
+	@python ./apps/plot_multi_class3.py --verbose scores.all.txt
+	@python ./apps/plot_surface_bathy3.py --verbose scores.binary.txt
+	@python ./apps/plot_surface_bathy3.py --verbose cross_val.binary.?.txt
+
 ##############################################################################
 #
 # Get help by running
