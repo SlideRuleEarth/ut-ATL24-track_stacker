@@ -17,6 +17,6 @@ nonsurface	openoceanspp	0.949	0.730	0.842	0.762	0.702	0.759
 surface	qtrees	0.947	0.965	0.929	0.908	0.850	0.913
 bathy	qtrees	0.986	0.611	0.743	0.661	0.625	0.660
 nonsurface	qtrees	0.939	0.612	0.738	0.656	0.603	0.652
-surface	ensemble	0.984	0.989	0.971	0.968	0.953	0.970
-bathy	ensemble	0.994	0.865	0.927	0.874	0.862	0.882
-nonsurface	ensemble	0.974	0.868	0.922	0.869	0.854	0.878
+surface	ensemble	0.984	0.989	0.971	0.968	0.953	0.971
+bathy	ensemble	0.994	0.865	0.927	0.873	0.862	0.881
+nonsurface	ensemble	0.974	0.868	0.922	0.868	0.854	0.878
