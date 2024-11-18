@@ -52,9 +52,9 @@ def plot(title, df):
     ax.set_title(title)
     ax.set_ylim(0.0, 1.1)
     y = ax.bar(df1.Name, df1.F1, label='surface', color='tab:green')
-    ax.bar_label(y, label_type='edge')
+    ax.bar_label(y, label_type='edge', fmt='%0.3f')
     y = ax.bar(df3.Name, df3.F1, label='bathy', color='tab:brown')
-    ax.bar_label(y, label_type='edge')
+    ax.bar_label(y, label_type='edge', fmt='%0.3f')
     ax.legend(loc='lower center', ncols=2)
     plt.xticks(range(len(df1.Name)), df1.Name, rotation=90)
     plt.title(title, fontsize=16)
@@ -93,7 +93,10 @@ def main(args):
     df = df[df.Name != 'openoceans']
 
     # Plot it
-    title = f"ATL24 binary F1 Scores ({len(fns)} files)"
+    if len(fns) > 1:
+        title = f"ATL24 {len(fns)}-fold cross validation F1 scores"
+    else:
+        title = f"ATL24 F1 scores"
     plot(title, df)
 
 
