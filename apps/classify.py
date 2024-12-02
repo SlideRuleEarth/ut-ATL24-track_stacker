@@ -105,8 +105,8 @@ def classify(df, verbose, model_filename):
     df["ensemble_bathy_prob"] = q
 
     # Change labels back to APSRS
-    df[df == 1] = 40
-    df[df == 2] = 41
+    df.loc[df['ensemble'] == 1] = 40
+    df.loc[df['ensemble'] == 2] = 41
 
     # Add the indexes
     df["index_ph"] = index_ph
