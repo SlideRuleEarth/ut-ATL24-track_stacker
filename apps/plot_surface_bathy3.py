@@ -94,6 +94,7 @@ def main(args):
     df = df[df.Name != 'coastnet']
     df = df[df.Name != 'openoceanspp']
     df = df[df.Name != 'qtrees']
+    df = df[df.Name != 'ensemble']
 
     if args.verbose:
         print(df, file=sys.stderr)
