@@ -73,7 +73,7 @@ def classify(df, verbose, model_filename):
         print(df.columns, file=sys.stderr)
 
     x = df.drop('manual_label', axis=1).to_numpy()
-    y = df.manual_label.to_numpy()
+    y = df.manual_label.copy().to_numpy()
 
     # Make labels consecutive
     y[y == 40] = 1
