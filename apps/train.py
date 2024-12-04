@@ -31,15 +31,17 @@ def main(args):
     # Master dataframe
     df = pd.DataFrame()
 
+    # Extract data and combine into a single dataframe
     for n, fn in enumerate(filenames):
 
         if args.verbose:
-            print(f'Reading {n + 1} of {len(filenames)}: {fn}')
+            print(f'Reading {n + 1} of {len(filenames)}: {fn}',
+                  file=sys.stderr)
 
         d = pd.read_csv(fn, engine='pyarrow')
 
         if args.verbose:
-            print(f'Read {len(d.index)} rows')
+            print(f'Read {len(d.index)} rows', file=sys.stderr)
 
         # Get indexes of points marked as bathy
         indexes = d.index[(d['qtrees'] == 40) |
@@ -49,9 +51,8 @@ def main(args):
                           (d['openoceanspp'] == 40) |
                           (d['coastnet'] == 40)]
 
-        # Get a list of 2D points
-        p = d[['x_atc', 'geoid_corr_h']].to_numpy()
-        p = p[indexes]
+        # Get a list of photons that contain at least one bathy prediction
+        p = d[['x_atc', 'geoid_corr_h']].copy().to_numpy()[indexes]
 
         # Apply aspect ratio
         aspect_ratio = 10
@@ -62,9 +63,10 @@ def main(args):
         lof = LocalOutlierFactor(n_neighbors=n_neighbors)
         lof.fit(p)
 
-        # Get densities
+        # Get densities of bathy photons
         density = lof.negative_outlier_factor_
 
+        # Keep only the columns we need
         d = d[['geoid_corr_h',
                'surface_h',
                'qtrees',
@@ -80,12 +82,14 @@ def main(args):
         d.loc[indexes, 'density'] = density
 
         if args.verbose:
-            print(d.columns)
+            print(d.columns, file=sys.stderr)
 
+        # Save the columns to the master dataframe
         df = pd.concat([df, d])
 
     if args.verbose:
-        print(f'Final dataframe = {df.shape}')
+        print(f'Final dataframe = {df.shape}', file=sys.stderr)
+        print(df.describe(), file=sys.stderr)
 
     algorithms = [
         'bathypathfinder',
@@ -96,26 +100,12 @@ def main(args):
         'qtrees',
         ]
 
-    ref = df['manual_label']
-
     if args.verbose:
-        x = ref.unique()
-        print(f'unique(ref): {x}')
+        x = df['manual_label'].unique()
+        print(f'unique(ref): {x}', file=sys.stderr)
         for col in algorithms:
             x = df[col].unique()
-            print(f'unique({col}): {x}')
-
-    # Replace NAN's with 0's
-    df = df.fillna(0)
-    # Replace 'unknown' with 'unclassified'
-    df = df.replace(1.0, 0.0)
-    # Replace 'water column' with 'unclassified'
-    df = df.replace(45.0, 0.0)
-
-    if args.verbose:
-        for col in algorithms:
-            x = df[col].unique()
-            print(f'unique({col}): {x}')
+            print(f'unique({col}): {x}', file=sys.stderr)
 
     features = algorithms.copy()
     features.append('geoid_corr_h')
@@ -123,15 +113,28 @@ def main(args):
     features.append('density')
 
     if args.verbose:
-        print('Features:', features)
+        print('Features:', features, file=sys.stderr)
 
-    x = df[df.columns.intersection(features)]
-    y = df.manual_label.to_numpy()
+    x = df[df.columns.intersection(features)].copy()
+    y = df['manual_label'].copy()
+
+    # Replace 'unknown' with 'unclassified'
+    y[y == 1] = 0
+
+    # Replace 'water column' with 'unclassified'
+    y[y == 45] = 0
 
     # Make labels consecutive
     y[y == 40] = 1
     y[y == 41] = 2
 
+    if args.verbose:
+        print('X=', file=sys.stderr)
+        print(x.describe(), file=sys.stderr)
+        print('Y=', file=sys.stderr)
+        print(y.describe(), file=sys.stderr)
+
+    # Create the classifier
     max_depth = 6
     clf = xgb.XGBClassifier(device='cuda', max_depth=max_depth)
 
@@ -165,18 +168,19 @@ def main(args):
                   file=sys.stderr)
 
     if args.permutation_importances:
-        print('Getting permutation importances...')
+        print('Getting permutation importances...', file=sys.stderr)
         r = permutation_importance(clf,
                                    x,
                                    y,
                                    n_repeats=10,
                                    random_state=0)
-        print(r)
+        print(r, file=sys.stderr)
 
         for i in r.importances_mean.argsort()[::-1]:
             print(f"{x.columns[i]:<20}"
                   f"{r.importances_mean[i]:5.2f}"
-                  f" +/- {r.importances_std[i]:5.2f}")
+                  f" +/- {r.importances_std[i]:5.2f}",
+                  file=sys.stderr)
 
 
 if __name__ == "__main__":
