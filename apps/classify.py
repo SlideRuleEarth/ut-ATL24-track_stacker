@@ -7,28 +7,24 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.neighbors import LocalOutlierFactor
 
+# Turn off SettingWithCopyWarning
+pd.options.mode.chained_assignment = None  # default='warn'
+
 
 def classify(df, verbose, model_filename):
 
-    # Replace NAN's with 0's
-    df = df.fillna(0)
-    # Replace 'unknown' with 'unclassified'
-    df = df.replace(1.0, 0.0)
-    # Replace 'water column' with 'unclassified'
-    df = df.replace(45.0, 0.0)
-
     # Add a manual label column if one does not exist
     if 'manual_label' not in df.columns:
-        df[['manual_label']] = 0
+        df['manual_label'] = 0
 
     # Make sure manual label is an int
-    df[['manual_label']] = df[['manual_label']].astype(int)
+    df['manual_label'] = df['manual_label'].astype(int)
 
     # Save photon indexes
-    index_ph = df[['index_ph']]
+    index_ph = df['index_ph']
 
     # Save along track distance
-    x_atc = df[['x_atc']]
+    x_atc = df['x_atc']
 
     # Get indexes of points marked as bathy
     indexes = df.index[(df['qtrees'] == 40) |
@@ -38,9 +34,8 @@ def classify(df, verbose, model_filename):
                        (df['openoceanspp'] == 40) |
                        (df['coastnet'] == 40)]
 
-    # Get a list of 2D points
-    p = df[['x_atc', 'geoid_corr_h']].to_numpy()
-    p = p[indexes]
+    # Get a list of photons that contain at least one bathy prediction
+    p = df[['x_atc', 'geoid_corr_h']].copy().to_numpy()[indexes]
 
     # Apply aspect ratio
     aspect_ratio = 10
@@ -51,7 +46,7 @@ def classify(df, verbose, model_filename):
     lof = LocalOutlierFactor(n_neighbors=n_neighbors)
     lof.fit(p)
 
-    # Get densities
+    # Get densities of bathy photons
     density = lof.negative_outlier_factor_
 
     # Keep only the columns we need
@@ -66,14 +61,20 @@ def classify(df, verbose, model_filename):
              'manual_label']]
 
     # Add the density
-    df['density'] = density.max()
+    df.loc[:, 'density'] = density.max()
     df.loc[indexes, 'density'] = density
 
     if verbose:
-        print(df.columns, file=sys.stderr)
+        print(df.describe(), file=sys.stderr)
 
     x = df.drop('manual_label', axis=1).to_numpy()
     y = df.manual_label.copy().to_numpy()
+
+    # Replace 'unknown' with 'unclassified'
+    y[y == 1] = 0
+
+    # Replace 'water column' with 'unclassified'
+    y[y == 45] = 0
 
     # Make labels consecutive
     y[y == 40] = 1
@@ -98,18 +99,21 @@ def classify(df, verbose, model_filename):
         print(f'Balanced accuracy\t{ba:.3f}', file=sys.stderr)
 
     # Add back x_atc column for viewing
-    df["x_atc"] = x_atc
+    df.loc[:, "x_atc"] = x_atc
+
+    # Change predictions back to ASPRS
+    p[p == 1] = 40
+    p[p == 2] = 41
 
     # Assign predictions
-    df["ensemble"] = p
-    df["ensemble_bathy_prob"] = q
-
-    # Change labels back to APSRS
-    df.loc[df['ensemble'] == 1] = 40
-    df.loc[df['ensemble'] == 2] = 41
+    df.loc[:, "ensemble"] = p
+    df.loc[:, "ensemble_bathy_prob"] = q
 
     # Add the indexes
-    df["index_ph"] = index_ph
+    df.loc[:, "index_ph"] = index_ph
+
+    if verbose:
+        print(df.describe(), file=sys.stderr)
 
     return df
 
