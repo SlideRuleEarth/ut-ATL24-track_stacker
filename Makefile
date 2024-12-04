@@ -32,8 +32,8 @@ classify: check_hashes
 
 .PHONY: score # Score predictions
 score:
-	make --no-print-directory score_all > scores.all.txt
-	make --no-print-directory score_binary > scores.binary.txt
+	make --no-print-directory score_all | tee scores.all.txt
+	make --no-print-directory score_binary | tee scores.binary.txt
 
 score_all:
 	@python apps/score.py --verbose --all "$(OUTPUT_DIR)/*.csv"
