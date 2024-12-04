@@ -5,4 +5,4 @@ all	cshelph	0.922	0.918	0.710 	0.922
 all	medianfilter	0.929	0.929	0.828 	0.929
 all	openoceanspp	0.909	0.908	0.815 	0.909
 all	qtrees	0.927	0.925	0.794 	0.927
-all	ensemble	0.893	0.896	0.842 	0.893
+all	ensemble	0.890	0.893	0.840 	0.890
